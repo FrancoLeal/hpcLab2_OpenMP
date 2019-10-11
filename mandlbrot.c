@@ -6,13 +6,17 @@ float mandelbrot(float c_re, float c_im, float depth){
     float k=1;
     float z_re = 0 + c_re;
     float z_im = 0 + c_im;
-    float dist = c_re*c_re + c_im*c_im;
+    float z_re2 = z_re*z_re;
+    float z_im2 = z_im*z_im;
+    float dist = sqrt(z_re2 + z_im2);
     //printf("dist: %f\n",dist);
     while(k<depth && dist < 2){
-        z_re = z_re*z_re - z_im*z_im + c_re;
         z_im = 2*z_re*z_im + c_im;
+        z_re = z_re2 - z_im2 + c_re;
+        z_re2 = z_re*z_re;
+        z_im2 = z_im*z_im;
         //printf("real: %f, im: %f\n",z_re,z_im);
-        dist = z_re*z_re + z_im*z_im;
+        dist = sqrt(z_re2 + z_im2);
         k++;
     }
     return k;
