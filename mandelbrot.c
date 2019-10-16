@@ -1,57 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
+#include "funciones.h"
 
-float mandelbrot(float c_re, float c_im, float depth){
-    float k=0;
-    float z_re = 0 + c_re;
-    float z_im = 0 + c_im;
-    float z_re2 = z_re*z_re;
-    float z_im2 = z_im*z_im;
-    float dist = sqrt(z_re2 + z_im2);
-    //printf("dist: %f\n",dist);
-    while(k<depth && dist < 2){
-        z_im = 2*z_re*z_im + c_im;
-        z_re = z_re2 - z_im2 + c_re;
-        z_re2 = z_re*z_re;
-        z_im2 = z_im*z_im;
-        //printf("real: %f, im: %f\n",z_re,z_im);
-        dist = sqrt(z_re2 + z_im2);
-        k++;
-    }
-    return k;
-}
 
-void main(){
-    //int k = mandelbrot(1,0,500);
-    //printf("valor: %d\n",k);
-    float reInf = -1;
-    float reSup = 1;
-    float imInf = -1;
-    float imSup = 1;
-    float depth = 500;
-    float s = 0.001;
-    char * filename = "salida.raw";
-    float reDim = ceil((reSup-reInf)/s+1);
-    float imDim = ceil((imSup-imInf)/s+1);
-    printf("redim: %f, imdim: %f\n",reDim,imDim);
-    float ** matrix = (float**)malloc(sizeof(float*)*reDim);
-    int i,j;
-    for(i=0;i<reDim;i++){
-        matrix[i] = (float*)malloc(sizeof(float)*imDim);
+int main(int argc,char * argv[]){
+    if(argc<15){
+        printf("Argumentos insuficientes.\n");
+        exit(1);
     }
-    for(i=0;i<reDim;i++){
-        for(j=0;j<imDim;j++){
-            float c_re = reInf + i*s;
-            float c_im = imInf + j*s;
-            float k = mandelbrot(c_re,c_im,depth);
-            matrix[i][j] = log(k)+1;
+    /*
+    i: número máximo de iteraciones
+    a: valor inferior de la parte real
+    c: valor superior de la parte real
+    b: valor inferior de la parte imaginaria
+    d: valor superior de la parte imaginaria
+    s: frecuencia de muestreo
+    f: nombre del archivo de salida
+    */
+    float reInf;
+    float reSup;
+    float imInf;
+    float imSup;
+    float depth;
+    float s;
+    char * filename;
+    int c;
+
+
+    opterr=0;
+
+    while((c=getopt(argc,argv,"i:a:c:b:d:s:f:"))!=-1){
+        switch (c){
+            case 'i':
+                sscanf(optarg,"%f",&depth);
+                break;
+            case 'a':
+                sscanf(optarg,"%f",&reInf);
+                break;
+            case 'c':
+                sscanf(optarg,"%f",&reSup);
+                break;
+            case 'b':
+                sscanf(optarg,"%f",&imInf);
+                break;
+            case 'd':
+                sscanf(optarg,"%f",&imSup);
+                break;
+            case 's':
+                sscanf(optarg,"%f",&s);
+                break;
+            case 'f':
+                filename = optarg;
+                break;
+            case '?':
+                break;
         }
-        //printf("\n");
     }
-    FILE * fp = fopen(filename,"w");
-    for(i=0;i<reDim;i++){
-        fwrite(matrix[i],sizeof(float),imDim,fp);
-    }
-    fclose(fp);
+    //printf("depth: %f, reInf: %f, reSup: %f, imInf: %f, imSup: %f, s: %f, f: %s\n",depth,reInf,reSup,imInf,imSup,s,filename);
+    mandelbrotS(depth,reInf,reSup,imInf,imSup, s, filename);
+    return 0;
 }
